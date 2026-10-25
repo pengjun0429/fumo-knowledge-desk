@@ -1,6 +1,6 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
-  "name": "notedock",
+  "name": "fumo-knowledge-desk",
   "main": "worker.js",
   "compatibility_date": "2026-10-25",
   "compatibility_flags": ["nodejs_compat"],
@@ -27,10 +27,10 @@
   },
   "env": {
     "staging": {
-      "name": "notedock-staging"
+      "name": "fumo-knowledge-desk-staging"
     },
     "production": {
-      "name": "notedock-production"
+      "name": "fumo-knowledge-desk-production"
     }
   }
 }

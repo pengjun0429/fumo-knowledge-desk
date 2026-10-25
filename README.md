@@ -1,28 +1,46 @@
 # FUMO Knowledge Desk
 
-FUMO Knowledge Desk 是 FUMO 企業內部使用的 Markdown 協作知識工作台，預設不提供公開空間與匿名分享。
+FUMO Knowledge Desk 是 FUMO 企業內部使用的 Markdown 協作知識工作台。
+
+## 固定帳號登入
+
+登入帳號固定為 FUMO 管理員帳號，登入驗證由 Cloudflare Worker 伺服器端處理。密碼不會寫入前端、GitHub 或 `wrangler.jsonc`。
+
+需要設定兩個 Cloudflare Worker Secret：
+
+```bash
+npx wrangler secret put FUMO_LOGIN_PASSWORD --env production
+npx wrangler secret put FUMO_SESSION_SECRET --env production
+```
+
+`FUMO_LOGIN_EMAIL` 可以用 Worker variable 設定；目前預設為 `fumo@damcurryrice.com`。建議正式環境仍把它一併放入 secret 或 variable 管理。請不要把真實密碼填入公開 repository。
+
+本機測試可複製 `.dev.vars.example` 為 `.dev.vars`，再填入本機密碼與一組隨機 session secret；`.dev.vars` 已被 Git 忽略。
 
 ## 目前已完成
 
-- FUMO 企業專用工作區介面
-- 移除公開空間切換與公開連結選項
-- 文件預設為「FUMO 企業私有」
-- FUMO 登入介面：註冊 ID／密碼、Google 登入、註冊入口
-- 登入介面路徑：`/login/`
+- FUMO 企業專用工作區
+- 固定 Email 帳號登入介面
+- `/api/auth/login`、`/api/auth/me`、`/api/auth/logout`
+- HttpOnly、Secure、SameSite session cookie
+- 未登入的正式環境使用者會導向 `/login/`
+- 文件 API 需要有效登入 session
 - Cloudflare Workers + Static Assets 架構
-- D1 schema 已預留工作區、文件、權限與版本索引
+- D1 schema 已預留文件與版本資料
 
-## 登入現況
+## Cloudflare 部署
 
-目前完成的是登入介面原型，尚未連接 FUMO 現有帳號的驗證 API，因此提交按鈕不會建立真正的登入 session。要完成正式登入，需要取得 FUMO 現有登入系統的 API、OAuth／OIDC 或 session/JWT 驗證介面。
+登入 Cloudflare 後執行：
 
-現有 FUMO 公開登入頁為：
-
-```text
-https://www.micronationfumo.org/login
+```bash
+npx wrangler login
+npx wrangler d1 create fumo-notedock-db
+npx wrangler secret put FUMO_LOGIN_PASSWORD --env production
+npx wrangler secret put FUMO_SESSION_SECRET --env production
+npx wrangler deploy --env production
 ```
 
-它支援註冊 ID／密碼與已註冊 Email 的 Google 登入。NoteDock 不應自行再建立另一套密碼資料庫。
+正式環境建議把 Worker 綁到 `micronationfumo.org` 的受保護路徑或子網域，並先在 Cloudflare Access 設定 default-deny。不要把 `workers.dev` 當成唯一正式入口。
 
 ## 本機啟動
 
@@ -30,32 +48,9 @@ https://www.micronationfumo.org/login
 npm run dev
 ```
 
-開啟：
+登入頁：`http://127.0.0.1:5173/login/`
+Cloudflare 本機 Worker：`npx wrangler dev`
 
-```text
-http://127.0.0.1:5173/login/
-```
+## 安全注意
 
-## Cloudflare 架構
-
-- **Workers + Static Assets**：提供 FUMO 前端與 `/api/*` API。
-- **Cloudflare Access**：正式入口的企業登入與 default-deny 邊界，可作為外層保護。
-- **D1**：儲存 FUMO 工作區、文件、權限與版本索引。
-- **R2**：下一階段儲存附件與圖片。
-- **Durable Objects**：下一階段處理多人即時編輯的房間狀態與 WebSocket 協調。
-
-## 建立 D1（登入 Cloudflare 後執行）
-
-```bash
-npx wrangler login
-npx wrangler d1 create fumo-notedock-db
-```
-
-把回傳的 `database_id` 加到 `wrangler.jsonc`，再執行：
-
-```bash
-npx wrangler d1 execute fumo-notedock-db --local --file=./schema.sql
-npx wrangler d1 execute fumo-notedock-db --remote --file=./schema.sql
-```
-
-目前尚未登入 Cloudflare、建立 D1／R2 或正式部署。
+GitHub repository 是公開的，因此只能公開程式碼、設定範例與文件。真實密碼、session secret、API token 與 Cloudflare credentials 必須使用 Secret 管理。若剛才在聊天或其他公開位置貼過真實密碼，正式啟用前請先更換密碼。
