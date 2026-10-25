@@ -15,6 +15,8 @@ CREATE TABLE IF NOT EXISTS documents (
   description TEXT NOT NULL DEFAULT '',
   body TEXT NOT NULL DEFAULT '',
   privacy TEXT NOT NULL DEFAULT 'team' CHECK (privacy IN ('private', 'team', 'public')),
+  share_token TEXT UNIQUE,
+  shared_at TEXT,
   starred INTEGER NOT NULL DEFAULT 0,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -23,3 +25,7 @@ CREATE TABLE IF NOT EXISTS documents (
 
 CREATE INDEX IF NOT EXISTS idx_documents_workspace_updated
   ON documents(workspace_id, updated_at DESC);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_documents_share_token
+  ON documents(share_token)
+  WHERE share_token IS NOT NULL;

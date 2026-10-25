@@ -25,6 +25,8 @@ npx wrangler secret put FUMO_SESSION_SECRET --env production
 - HttpOnly、Secure、SameSite session cookie
 - 未登入的正式環境使用者會導向 `/login/`
 - 文件 API 需要有效登入 session
+- 單篇文件可選「只有我」、「FUMO 成員」或「公開分享連結」
+- 公開分享連結使用單篇 `share_token`，不會公開整個工作區
 - Cloudflare Workers + Static Assets 架構
 - D1 schema 已預留文件與版本資料
 
@@ -41,6 +43,8 @@ npx wrangler deploy --env production
 ```
 
 正式環境建議把 Worker 綁到 `micronationfumo.org` 的受保護路徑或子網域，並先在 Cloudflare Access 設定 default-deny。不要把 `workers.dev` 當成唯一正式入口。
+
+目標正式網域為 `https://md.micronationfumo.org`。目前 Cloudflare API 查不到 `micronationfumo.org` 在 FUMO 帳號的 active Zone，因此自訂網域路由已寫入 `wrangler.jsonc`，但尚未能啟用 DNS／Worker route。先把網域加入同一個 Cloudflare 帳號，或提供正確的 Cloudflare Zone 所屬帳號，再執行部署。
 
 ## 本機啟動
 
