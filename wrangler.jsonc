@@ -1,0 +1,36 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "notedock",
+  "main": "worker.js",
+  "compatibility_date": "2026-10-25",
+  "compatibility_flags": ["nodejs_compat"],
+  "upload_source_maps": true,
+  "vars": {
+    "APP_NAME": "FUMO Knowledge Desk",
+    "ACCESS_MODE": "fumo-enterprise-only"
+  },
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*"]
+  },
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1
+  },
+  "dev": {
+    "ip": "127.0.0.1",
+    "port": 8787,
+    "local_protocol": "http",
+    "generate_types": true
+  },
+  "env": {
+    "staging": {
+      "name": "notedock-staging"
+    },
+    "production": {
+      "name": "notedock-production"
+    }
+  }
+}
